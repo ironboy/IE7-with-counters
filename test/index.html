@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<style>
+body {counter-reset:section;}
+h1 {counter-reset:subsection;}
+h1:before
+{
+counter-increment:section;
+content:"Section " counter(section) ". ";
+}
+</style>
+
+<link rel="stylesheet" type="text/css" href="main.css">
+<script src="../ie9.js"></script>
+
+</head>
+
+<body>
+
+<h1>HTML tutorials</h1>
+<h2>HTML Tutorial</h2>
+<h2>XHTML Tutorial</h2>
+<h2>CSS Tutorial</h2>
+
+<h1>Scripting tutorials</h1>
+<h2>JavaScript</h2>
+<h2>VBScript</h2>
+
+<h1>XML tutorials</h1>
+<h2>XML</h2>
+<h2>XSL</h2>
+
+</body>
+</html>
+
