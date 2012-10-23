@@ -26,7 +26,10 @@ var IE7 = window.IE7 = {
   toString: K("[IE7]")
 };
 IE7.compat = 9;
-var appVersion = IE7.appVersion = navigator.appVersion.match(/MSIE (\d\.\d)/)[1] - 0;
+
+var appVersion; 
+try {appVersion = IE7.appVersion = navigator.appVersion.match(/MSIE (\d\.\d)/)[1] - 0} 
+catch(e){appVersion = IE7.compat;};
 
 if (/ie7_off/.test(top.location.search) || appVersion < 5.5 || appVersion >= IE7.compat) return;
 
