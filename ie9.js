@@ -413,6 +413,15 @@ function K(k) {
   };
 };
 
+
+// -----------------------------------------------------------------------
+// pseudoBetter - improving support for :before, :after and css counters
+// -----------------------------------------------------------------------
+pseudoBetter = function(x){
+  return x;
+}
+
+
 // -----------------------------------------------------------------------
 // parsing
 // -----------------------------------------------------------------------
@@ -709,7 +718,7 @@ IE7.CSS = new (Fix.extend({ // single instance
     var styleSheets = document.getElementsByTagName("style"), styleSheet;
     for (var i = styleSheets.length - 1; styleSheet = styleSheets[i]; i--) {
       if (!styleSheet.disabled && !styleSheet.ie7) {
-        styleSheet._cssText = styleSheet.innerHTML;
+        styleSheet._cssText = pseudoBetter(styleSheet.innerHTML);
       }
     }
   },
@@ -726,6 +735,7 @@ IE7.CSS = new (Fix.extend({ // single instance
       cssText = "";
     }
     if (httpRequest) cssText = loadFile(styleSheet.href, path) || cssText;
+    cssText = pseudoBetter(cssText);
     return cssText;
   },
   
