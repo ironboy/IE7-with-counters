@@ -418,14 +418,6 @@ function K(k) {
 
 
 // -----------------------------------------------------------------------
-// pseudoBetter - improving support for :before, :after and css counters
-// -----------------------------------------------------------------------
-pseudoBetter = function(x){
-  return x;
-}
-
-
-// -----------------------------------------------------------------------
 // parsing
 // -----------------------------------------------------------------------
 
@@ -2864,6 +2856,16 @@ var cssQuery = (function() {
 function throwSelectorError() {
   throw new SyntaxError("Invalid selector.");
 };
+
+// -----------------------------------------------------------------------
+// pseudoBetter - improving support for :before, :after and css counters
+// -----------------------------------------------------------------------
+
+var pseudoBetter = (function(){
+  
+
+  return function(x){return x;}
+})();
 
 // -----------------------------------------------------------------------
 // initialisation
