@@ -2862,23 +2862,29 @@ function throwSelectorError() {
 // -----------------------------------------------------------------------
 
 var pseudoBetter = (function(){
+
+  // fix unicode escaped characers in content-properties in css
+  var fixUnicodeEscapedCharacters = function(x){
+    var t;
+    eval('t="' + x.replace(/\\/g,'\\u').replace(/"/g,'\\"') + '"');
+    return t;
+  };
   
   // replace counter css markup with live counters
   var findAndReplaceCounters = function(){
-    var m,t,t2,counters = {}, cname, els = document.getElementsByTagName('!');
+    var m,t,counters = {}, cname, els = document.getElementsByTagName('!');
     for(var i=0;i<els.length;i++){
       t = els[i].innerText;
       if(!t){continue;}
-      t2 = t;
-      m = t2.match(/counter\s*\([^\)]*\)/gi) || [];
+      t = fixUnicodeEscapedCharacters(t);
+      m = t.match(/counter\s*\([^\)]*\)/gi) || [];
       for(var j=0; j<m.length;j++){
         cname = m[j].split('(')[1].split(')')[0];
         counters[cname] = counters[cname] || 0;
         counters[cname]++;
-        t2 = t2.split('counter('+cname+')').join(counters[cname]);
+        t = t.split('counter('+cname+')').join(counters[cname]);
       }
-      els[i].innerText = t2;
-      els[i].style.marginTop='-3px';
+      els[i].innerText = t;
     }
   };
   // run after each recalc
