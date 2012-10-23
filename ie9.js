@@ -2863,8 +2863,13 @@ function throwSelectorError() {
 
 var pseudoBetter = (function(){
   
+  // fix for a bug that probably only occurs in ie9 when it emulates ie7
+  // --> content-property not applied if content is capitalized
+  var deCapContent = function(x){
+    return x.replace(/([\{|;]{1,}\s)*CONTENT:/g,'$1content:');
+  };
 
-  return function(x){return x;}
+  return deCapContent;
 })();
 
 // -----------------------------------------------------------------------
