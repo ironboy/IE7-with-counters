@@ -17,7 +17,10 @@
   Ingo Chao
 */
 
-// timestamp: Fri, 30 Apr 2010 20:59:18
+// original timestamp: Fri, 30 Apr 2010 20:59:18
+
+// forked and modded for css counters, October 2012
+// by Thomas Frank
 
 (function(window, document) {
 
@@ -2081,7 +2084,10 @@ if (appVersion < 8) {
         var propertyName = inherited[i].replace(STRIP_IE7_FLAGS, "");
         if (element.currentStyle["ie7-" + propertyName] === "inherit") {
           propertyName = propertyName.replace(DASH_LOWER, toUpper);
-          element.runtimeStyle[propertyName] = element.parentElement.currentStyle[propertyName];
+          try{
+            // try...catch needed because of non-valid properties used by pseudoBetter
+            element.runtimeStyle[propertyName] = element.parentElement.currentStyle[propertyName];
+          } catch(e){};
         }
       }
     }
@@ -2858,10 +2864,14 @@ function throwSelectorError() {
 };
 
 // -----------------------------------------------------------------------
-// pseudoBetter - improving support for :before, :after and css counters
+// pseudoBetter - improving support for :before, :after and css counters 
+// (ie version 7 and earlier)
 // -----------------------------------------------------------------------
 
 var pseudoBetter = (function(){
+
+  // do not run in ie >= 8
+  if(appVersion>=8){return function(x){return x;};}
 
   // fix unicode escaped characers in content-properties in css
   var fixUnicodeEscapedCharacters = function(x){
@@ -2924,6 +2934,9 @@ var pseudoBetter = (function(){
           t = t.split('counter('+cname+')').join(counterMem[cname] || 0);
         }
         els[i].innerText = t;
+        // :before :after elements with display:block
+        // seems to be replaced fix this (experimental)
+        els[i].style.marginTop = '-3px'; 
       }
     }
   };
