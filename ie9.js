@@ -785,7 +785,10 @@ IE7.CSS = new (Fix.extend({ // single instance
   },
   
   refresh: function() {
+    var pseudos = document.getElementsByTagName('!');
+    while(pseudos.length){pseudos[0].parentNode.removeChild(pseudos[0]);}
     this.styleSheet.cssText = HEADER + this.screen + this.print;
+    IE7.readyForRecalcs && IE7.recalc();
   },
   
   trash: function() {
@@ -3006,6 +3009,7 @@ IE7.loaded = true;
   IE7.CSS.apply();
 
   IE7.recalc();
+  IE7.readyForRecalcs = true;
 })();
 
 })(this, document);
