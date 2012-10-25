@@ -2869,22 +2869,56 @@ var pseudoBetter = (function(){
     eval('t="' + x.replace(/\\/g,'\\u').replace(/"/g,'\\"') + '"');
     return t;
   };
-  
-  // replace counter css markup with live counters
-  var findAndReplaceCounters = function(){
-    var m,t,counters = {}, cname, els = document.getElementsByTagName('!');
-    for(var i=0;i<els.length;i++){
-      t = els[i].innerText;
-      if(!t){continue;}
-      t = fixUnicodeEscapedCharacters(t);
-      m = t.match(/counter\s*\([^\)]*\)/gi) || [];
-      for(var j=0; j<m.length;j++){
-        cname = m[j].split('(')[1].split(')')[0];
-        counters[cname] = counters[cname] || 0;
-        counters[cname]++;
-        t = t.split('counter('+cname+')').join(counters[cname]);
+
+  // since (for some reason unknow) we can not read "currentStyle"
+  // of css counter-increment and counter-reset
+  // duplicate them ie7pseudobetterCI and ie7pseudobetterCR
+  var findAndRegisterResetsAndIcrements = function(x){
+    var xx = ('}' + x).split('}'), t, e, rule;
+    var style = document.createStyleSheet();
+    var props = {___ci: /counter-increment/i, ___cr: /counter-reset/i};
+    for(var i = 1, a; a = xx[i]; i++){
+      a = a.replace(/\s*/,'');
+      e = a.split('{')[0];
+      for(var j in props){
+        t = a.split(props[j]);
+        if(t.length > 1){
+          style.addRule(e,j + t[1].split(/(\}|;)/)[0]);
+        }
       }
-      els[i].innerText = t;
+    }
+    return style.cssText + '\n' + x;
+  };
+
+  var moveCounters = function(action,_rest){
+    if(!_rest){return;}
+    _rest = _rest.split(' ');
+    var counterName = _rest[0], step = _rest[1];
+
+    console.log(action,' ',counterName,' ',step);
+
+  };
+
+  // replace counter css markup with live counters
+  var counterMem = {}, findAndReplaceCounters = function(){
+    var m,t, cname, els = document.all;
+    for(var i=0;i<els.length;i++){
+      // increments and resets
+      moveCounters('cr',els[i].currentStyle.___cr);
+      moveCounters('ci',els[i].currentStyle.___ci);
+      // render counters
+      if(els[i].tagName == '!'){
+        t = els[i].innerText;
+        if(!t){continue;}
+        t = fixUnicodeEscapedCharacters(t);
+        m = t.match(/counter\s*\([^\)]*\)/gi) || [];
+        for(var j=0; j<m.length;j++){
+          cname = m[j].split('(')[1].split(')')[0];
+          counterMem[cname] = counterMem[cname] || {val:0};
+          t = t.split('counter('+cname+')').join(counterMem[cname].val);
+        }
+        els[i].innerText = t;
+      }
     }
   };
   // run after each recalc
@@ -2896,8 +2930,16 @@ var pseudoBetter = (function(){
     return x.replace(/([\{|;]{1,}\s)*CONTENT:/g,'$1content:');
   };
 
-  return deCapContent;
+  // init gets called on all chunks of css
+  var init = function(x,a,b,c){
+    if(x=='__count'){return registerCounterEvent(a,b,c);}
+    var r = findAndRegisterResetsAndIcrements(deCapContent(x));
+    return r;
+  };
+
+  return IE7.__pseudoBetter = init;
 })();
+
 
 // -----------------------------------------------------------------------
 // initialisation
