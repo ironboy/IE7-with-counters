@@ -2870,8 +2870,8 @@ var pseudoBetter = (function(){
     return t;
   };
 
-  // since (for some reason unknow) we can not read "currentStyle"
-  // of css counter-increment and counter-reset
+  // since (for some reason unknow) we can not read 
+  // css counter-increment and counter-reset through "currentStyle"
   // duplicate them ie7pseudobetterCI and ie7pseudobetterCR
   var findAndRegisterResetsAndIcrements = function(x){
     var xx = ('}' + x).split('}'), t, e, rule;
@@ -2879,7 +2879,7 @@ var pseudoBetter = (function(){
     var props = {___ci: /counter-increment/i, ___cr: /counter-reset/i};
     for(var i = 1, a; a = xx[i]; i++){
       a = a.replace(/\s*/,'');
-      e = a.split('{')[0];
+      e = a.split('{')[0].split(':before').join('').split(':after').join('');
       for(var j in props){
         t = a.split(props[j]);
         if(t.length > 1){
@@ -2887,20 +2887,27 @@ var pseudoBetter = (function(){
         }
       }
     }
+    //console.log(style.cssText)
     return style.cssText + '\n' + x;
   };
 
-  var moveCounters = function(action,_rest){
+  // move the counters according to the following rules
+  // 1) ignore counter increment if no previous counter reset
+  // 2) assume counter reset to 0 if not specified
+  // 3) assume counter increment by 1 if not specified
+  var counterMem, moveCounters = function(action,_rest){
     if(!_rest){return;}
     _rest = _rest.split(' ');
-    var counterName = _rest[0], step = _rest[1];
-
-    console.log(action,' ',counterName,' ',step);
-
+    var counterName = _rest[0], step = _rest[1] && !isNaN(_rest[1]) && _rest[1]/1;
+    if(!step && action == 'cr'){step = 0};
+    if(!step && action =="ci"){step = counterMem[counterName] !== undefined ? 1 : 0};
+    if(action == 'cr'){counterMem[counterName] = step;}
+    if(action == 'ci' && counterMem[counterName] !== undefined){counterMem[counterName]+=step;}
   };
 
   // replace counter css markup with live counters
-  var counterMem = {}, findAndReplaceCounters = function(){
+  var findAndReplaceCounters = function(){
+    counterMem = {};
     var m,t, cname, els = document.all;
     for(var i=0;i<els.length;i++){
       // increments and resets
@@ -2914,8 +2921,7 @@ var pseudoBetter = (function(){
         m = t.match(/counter\s*\([^\)]*\)/gi) || [];
         for(var j=0; j<m.length;j++){
           cname = m[j].split('(')[1].split(')')[0];
-          counterMem[cname] = counterMem[cname] || {val:0};
-          t = t.split('counter('+cname+')').join(counterMem[cname].val);
+          t = t.split('counter('+cname+')').join(counterMem[cname] || 0);
         }
         els[i].innerText = t;
       }
