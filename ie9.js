@@ -2935,7 +2935,7 @@ var pseudoBetter = (function(){
         }
         els[i].innerText = t;
         // :before :after elements with display:block
-        // seems to be replaced fix this (experimental)
+        // seems to be displaced fix this (experimental)
         els[i].style.marginTop = '-3px'; 
       }
     }
