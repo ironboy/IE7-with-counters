@@ -2886,7 +2886,7 @@ var pseudoBetter = (function(){
   var findAndRegisterResetsAndIcrements = function(x){
     var xx = ('}' + x).split('}'), t, e, rule;
     var style = document.createStyleSheet();
-    var props = {___ci: /counter-increment/i, ___cr: /counter-reset/i};
+    var props = {ci: /counter-increment/i, cr: /counter-reset/i};
     for(var i = 1, a; a = xx[i]; i++){
       a = a.replace(/\s*/,'');
       e = a.split('{')[0].split(':before').join('').split(':after').join('');
@@ -2921,8 +2921,8 @@ var pseudoBetter = (function(){
     var m,t, cname, els = document.all;
     for(var i=0;i<els.length;i++){
       // increments and resets
-      moveCounters('cr',els[i].currentStyle.___cr);
-      moveCounters('ci',els[i].currentStyle.___ci);
+      moveCounters('cr',els[i].currentStyle.cr);
+      moveCounters('ci',els[i].currentStyle.ci);
       // render counters
       if(els[i].tagName == '!'){
         t = els[i].innerText;
