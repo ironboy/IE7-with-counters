@@ -30,9 +30,9 @@ var IE7 = window.IE7 = {
 };
 IE7.compat = 9;
 
-var appVersion; 
-try {appVersion = IE7.appVersion = navigator.appVersion.match(/MSIE (\d\.\d)/)[1] - 0} 
-catch(e){appVersion = IE7.compat;};
+var appVersion;
+try {appVersion = IE7.appVersion = navigator.appVersion.match(/MSIE (\d\.\d)/)[1] - 0;}
+catch(e){appVersion = IE7.compat;}
 
 if (/ie7_off/.test(top.location.search) || appVersion < 5.5 || appVersion >= IE7.compat) return;
 
@@ -42,6 +42,12 @@ var Undefined = K();
 var documentElement = document.documentElement, body, viewport;
 var ANON = "!";
 var HEADER = ":link{ie7-link:link}:visited{ie7-link:visited}";
+
+// suppress error reporting in MSIE5
+if(MSIE5){
+  window.onerror=function(){return true;};
+}
+
 
 // -----------------------------------------------------------------------
 // external
