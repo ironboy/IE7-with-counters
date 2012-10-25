@@ -2900,7 +2900,6 @@ var pseudoBetter = (function(){
         }
       }
     }
-    //console.log(style.cssText)
     return style.cssText + '\n' + x;
   };
 
