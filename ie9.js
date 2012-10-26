@@ -2890,17 +2890,27 @@ var pseudoBetter = (function(){
   // css counter-increment and counter-reset through "currentStyle"
   // duplicate them ie7pseudobetterCI and ie7pseudobetterCR
   var findAndRegisterResetsAndIcrements = function(x){
-    var xx = ('}' + x).split('}'), t, e, rule;
+    var xx = ('}' + x).split('}'), t, e, ee, rule, selectorMem = {};
     var style = document.createStyleSheet();
     var props = {xxxci: /counter-increment/i, xxxcr: /counter-reset/i};
     for(var i = 1, a; a = xx[i]; i++){
       a = a.replace(/\s*/,'');
-      e = a.split('{')[0].split(':before').join('').split(':after').join('');
+      e = a.split('{')[0];
+      ee = '' + e.indexOf(':before') >= 0 ? 'b' : '';
+      ee += e.indexOf(':after') >= 0 ? 'a' : '';
+      e = e.split(':before').join('').split(':after').join('');
       for(var j in props){
         t = a.split(props[j]);
         if(t.length > 1){
-          style.addRule(e,j + t[1].split(/(\}|;)/)[0]);
+          selectorMem[e] = selectorMem[e] ? selectorMem[e] + '***' : '';
+          selectorMem[e] += j + ee + t[1].split(/(\}|;)/)[0];
         }
+      }
+    }
+    for(var i in selectorMem){
+      t = selectorMem[i].split('***');
+      for(var j = 0; j < t.length;j++){
+        style.addRule(i,t[j]);
       }
     }
     return style.cssText + '\n' + x;
@@ -2910,8 +2920,29 @@ var pseudoBetter = (function(){
   // 1) ignore counter increment if no previous counter reset
   // 2) assume counter reset to 0 if not specified
   // 3) assume counter increment by 1 if not specified
-  var counterMem, moveCounters = function(action,_rest){
-    if(!_rest){return;}
+  var defer, counterMem, moveCounters = function(action,_rest,el){
+    var p;
+    if(!_rest && !defer[el.sourceIndex]){return;}
+    // if the counter move is really on :before or :after
+    // than defer it until we reach the representation (a !-tag)
+    // of that pseudoelement
+    if(action.length > 2 &&  el.tagName != '!'){ 
+      p = el.getElementsByTagName('!');
+      p = p[action.charAt(2) == 'b' ? 0 : p.length-1];
+      if(p){
+        p = p.sourceIndex;
+        defer[p] = {action:action.substring(0,2),_rest:_rest};
+      }
+      return;
+    }
+    // resolve defered actions
+    if(!_rest){
+      p = defer[el.sourceIndex];
+      action = p.action;
+      _rest = p._rest; 
+      defer[el.sourceIndex] = null;
+    }
+    // act
     _rest = _rest.split(' ');
     var counterName = _rest[0], step = _rest[1] && !isNaN(_rest[1]) && _rest[1]/1;
     if(!step && action == 'cr'){step = 0};
@@ -2922,12 +2953,14 @@ var pseudoBetter = (function(){
 
   // replace counter css markup with live counters
   var findAndReplaceCounters = function(){
-    counterMem = {};
+    defer = []; counterMem = {};
+    var types = ['cr','ci','crb','cra','cib','cia'];
     var m,t, cname, els = document.all;
     for(var i=0;i<els.length;i++){
       // increments and resets
-      moveCounters('cr',els[i].currentStyle.xxxcr);
-      moveCounters('ci',els[i].currentStyle.xxxci);
+      for(var k = 0; k < types.length; k++){
+        moveCounters(types[k],els[i].currentStyle['xxx' + types[k]],els[i]);
+      }
       // render counters
       if(els[i].tagName == '!'){
         t = els[i].innerText;
